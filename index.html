@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Kontrol Lampu & Suhu</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 40px; }
+    button { padding: 10px 20px; margin: 10px; font-size: 18px; }
+    #suhu { font-size: 24px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Kontrol Lampu</h1>
+  <button onclick="setRelay(1)">Nyalakan</button>
+  <button onclick="setRelay(0)">Matikan</button>
+  <div id="suhu">Suhu: -- °C</div>
+
+  <script>
+    // Konfigurasi Firebase kamu
+    var firebaseConfig = {
+      apiKey: "AIzaSyDKONTOHKzG1-dc7sGgW7D-VHSZPbZLkH0",
+      authDomain: "pak-alan-demo.firebaseapp.com",
+      databaseURL: "https://pak-alan-demo-default-rtdb.firebaseio.com",
+      projectId: "pak-alan-demo",
+      storageBucket: "pak-alan-demo.appspot.com",
+      messagingSenderId: "239657130519",
+      appId: "1:239657130519:web:57ad03ddfa84b33133c7dc"
+    };
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.database();
+
+    function setRelay(state) {
+      db.ref("kontrol/relay").set(state);
+    }
+
+    // Update suhu realtime
+    db.ref("sensor/suhu").on("value", function(snapshot) {
+      document.getElementById("suhu").innerText = "Suhu: " + snapshot.val() + " °C";
+    });
+  </script>
+</body>
+</html>
