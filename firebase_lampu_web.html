@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Kontrol Lampu & Monitoring Suhu</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 50px; background: #f0f0f0; }
+    h1 { color: #333; }
+    .status { margin: 10px 0; }
+    .button {
+      padding: 10px 20px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .button.off {
+      background-color: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kontrol Lampu & Monitoring Suhu</h1>
+
+  <div class="status">
+    <strong>Suhu:</strong> <span id="suhu">--</span> &deg;C
+  </div>
+  <div class="status">
+    <strong>Status Sistem:</strong> <span id="status">offline</span>
+  </div>
+  <div class="status">
+    <strong>Uptime:</strong> <span id="uptime">0</span> detik
+  </div>
+
+  <button id="relayButton" class="button">Nyalakan Relay</button>
+
+  <script>
+    const firebaseURL = 'https://pak-alan-demo-default-rtdb.firebaseio.com';
+    const authToken = 'ihRoVidrkrPNjQzEbng0NL256owWBZ3mSMozqpWT';
+
+    async function get(path) {
+      const res = await fetch(`${firebaseURL}/${path}.json?auth=${authToken}`);
+      return await res.json();
+    }
+
+    async function set(path, value) {
+      const res = await fetch(`${firebaseURL}/${path}.json?auth=${authToken}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(value)
+      });
+      return await res.json();
+    }
+
+    async function updateData() {
+      const suhu = await get('sensor/suhu');
+      const status = await get('sistem/status');
+      const uptime = await get('sistem/uptime');
+      const relay = await get('kontrol/relay');
+
+      document.getElementById('suhu').innerText = suhu ?? '--';
+      document.getElementById('status').innerText = status ?? 'offline';
+      document.getElementById('uptime').innerText = uptime ?? 0;
+
+      const btn = document.getElementById('relayButton');
+      btn.innerText = relay ? 'Matikan Relay' : 'Nyalakan Relay';
+      btn.classList.toggle('off', !!relay);
+    }
+
+    document.getElementById('relayButton').addEventListener('click', async () => {
+      const current = await get('kontrol/relay');
+      await set('kontrol/relay', current ? 0 : 1);
+      updateData();
+    });
+
+    setInterval(updateData, 2000);
+    updateData();
+  </script>
+</body>
+</html>
